@@ -37,6 +37,7 @@ than expected, stop and report the scope expansion before proceeding.
 For any non-trivial task, follow this sequence before writing code:
 
 1. Understand the request: identify affected components, files, and runtime surfaces.
+   Search for `#AGENT` tags in relevant code — these mark tasks and context intended for you.
 2. Inspect the existing implementation, conventions, and dependencies.
 3. For multi-step or non-obvious work, form a short written plan. State scope and
    assumptions explicitly.
@@ -52,32 +53,43 @@ that before starting.
 
 ---
 
-## Engineering standards
+## Engineering standards (in priority order)
 
-- **KISS** – readable beats clever; the simplest correct solution wins.
-- **SOLID** – single responsibility, clear interfaces, no forced inheritance.
-- **DRY** – extract repeated logic, but do not over-abstract speculative patterns.
-- **YAGNI** – implement what is required now; no speculative extensibility.
-- **Separation of concerns** – ingestion, model logic, evaluation, orchestration,
-  and API layers stay distinct.
-- **MLOps repeatability** – reproducible runs via controlled dependencies,
-  deterministic config where possible, and versioned artifacts.
-- **Forward-only evolution** – prefer simplifying newly changed code over preserving
-  unnecessary legacy patterns, but do not introduce breaking interface changes
-  unless required by the task or explicitly approved.
-- **Minimal dependencies** – use native or already-adopted solutions before
-  introducing new libraries.
-- **Dependency discipline** – only add a new dependency when the existing stack is
-  insufficient and the added value clearly justifies it. Pin new dependencies to
-  specific versions; do not introduce floating or weakly justified additions.
-- **Explicit trade-offs** – when multiple valid solutions exist, prefer the one
-  with the best balance of correctness, maintainability, implementation risk,
-  and operational simplicity.
-- **No speculative optimization** – do not optimize for performance, abstraction,
-  or extensibility unless the task requires it or the current implementation is
-  clearly problematic.
-- **Behavior preservation** – preserve existing external behavior, interfaces,
-  and user-visible outputs unless the task explicitly requires changing them.
+Apply these principles in descending priority. Higher tiers override lower ones
+when they conflict.
+
+**Tier 1 — Correctness & safety**
+
+1. **Behavior preservation** – preserve existing external behavior, interfaces,
+   and user-visible outputs unless the task explicitly requires changing them.
+2. **KISS** – readable beats clever; the simplest correct solution wins.
+3. **SOLID** – single responsibility, clear interfaces, no forced inheritance.
+
+**Tier 2 — Maintainability & discipline**
+
+4. **DRY** – extract repeated logic, but do not over-abstract speculative patterns.
+5. **YAGNI** – implement what is required now; no speculative extensibility.
+6. **Separation of concerns** – ingestion, model logic, evaluation, orchestration,
+   and API layers stay distinct.
+7. **Dependency discipline** – only add a new dependency when the existing stack is
+   insufficient and the added value clearly justifies it. Pin new dependencies to
+   specific versions; do not introduce floating or weakly justified additions.
+8. **Minimal dependencies** – use native or already-adopted solutions before
+   introducing new libraries.
+
+**Tier 3 — Evolution & pragmatism**
+
+9. **MLOps repeatability** – reproducible runs via controlled dependencies,
+    deterministic config where possible, and versioned artifacts.
+10. **Forward-only evolution** – prefer simplifying newly changed code over preserving
+    unnecessary legacy patterns, but do not introduce breaking interface changes
+    unless required by the task or explicitly approved.
+11. **Explicit trade-offs** – when multiple valid solutions exist, prefer the one
+    with the best balance of correctness, maintainability, implementation risk,
+    and operational simplicity.
+12. **No speculative optimization** – do not optimize for performance, abstraction,
+    or extensibility unless the task requires it or the current implementation is
+    clearly problematic.
 
 ---
 
@@ -124,6 +136,20 @@ When uncertain about scope, ask one focused clarification question — not a lis
 
 ---
 
+## Error recovery
+
+When an implementation attempt fails (test failure, runtime error, build break):
+
+1. Diagnose root cause before retrying. Do not repeat the same approach blindly.
+2. Try a different fix strategy on each attempt.
+3. After **3 unsuccessful attempts** on the same issue, stop immediately.
+   Include in the completion summary:
+   - What was tried and why each attempt failed.
+   - The most likely root cause based on observed behavior.
+   - Recommended next steps for the user.
+
+---
+
 ## Truthfulness and constraints
 
 - Do not invent files, logs, outputs, test results, runtime behavior, or repo details.
@@ -132,6 +158,17 @@ When uncertain about scope, ask one focused clarification question — not a lis
   reproducibility, explain why and propose a better path.
 - If the task cannot be completed safely or fully, stop at the highest-confidence
   useful boundary and clearly state what remains blocked.
+
+---
+
+## Output discipline
+
+- Be direct. Use plain language. Avoid filler, preamble, and restating the request.
+- Scale output length to task complexity: a one-line fix gets a one-line answer.
+- Code changes: show only the modified code and minimal surrounding context.
+  Do not echo unchanged files or repeat large blocks for reference.
+- Explanations: state what changed, why, and what to watch — nothing more.
+- Do not generate markdown documentation files unless explicitly requested.
 
 ---
 
