@@ -3,6 +3,7 @@
 A reference for working with [Spec Kit](https://github.com/github/spec-kit), GitHub's toolkit for **Spec-Driven Development (SDD)**.
 
 ## Table of Contents
+
 1. [What Spec Kit Is](#1-what-spec-kit-is)
 2. [Command Quick Reference](#2-command-quick-reference)
 3. [Project Structure & Core Artifacts](#3-project-structure--core-artifacts)
@@ -28,6 +29,7 @@ A reference for working with [Spec Kit](https://github.com/github/spec-kit), Git
 Core idea: **specifications become the source of truth, code becomes the generated output.** Instead of code being king and specs being throwaway scaffolding, you write a spec, plan, and task list — and the agent generates and regenerates code from those.
 
 **Core philosophy:**
+
 - Intent-driven: define the *what/why* before the *how*
 - Specs are refined over multiple steps, not generated in one shot
 - Heavy reliance on the agent to interpret structured Markdown, not free-form chat
@@ -125,12 +127,14 @@ my-project/
 **What it is:** the one file that doesn't belong to any single feature. Project-wide rules that `/speckit.plan`, `/speckit.tasks`, and `/speckit.analyze` check every feature against. Written once, amended rarely.
 
 **Typical structure:**
+
 - **Project Purpose** — one paragraph, what problem this solves
 - **Core Principles** — numbered (I, II, III…), each a short rule + rationale
 - **Success Criteria** — what "MVP done" looks like, what's explicitly out of scope
 - **Governance** — amendment process, versioning policy (semantic versioning), compliance review cadence
 
 **Principle categories worth borrowing** (from the original SDD methodology's example "nine articles" — not mandatory, just good defaults):
+
 - **Library-first** — features start as standalone, reusable modules, not code glued into the app
 - **CLI-first / observability** — every capability should be inspectable via text in/out
 - **Test-first (non-negotiable)** — tests written and failing *before* implementation
@@ -147,26 +151,46 @@ A more advanced real-world pattern — worth it once several people will be amen
 
 ## Core Principles
 ### Pillar I — Guardrails & Scope Boundaries
-- No Speculation: ship the minimum needed to resolve the task; no unrequested
-  features or "flexible" placeholder config
-- Constructive Pushback: don't comply with a request that violates the
-  architecture — halt, explain the flaw, propose the correct alternative
+
+* **No Speculation:** Deliver only the minimum implementation required to satisfy the requested technical objective. Do not introduce unrequested features, premature optimizations, placeholder configurations, or speculative abstractions.
+* **Constructive Pushback:** If a request conflicts with sound architecture, established design patterns, or codebase integrity, do not implement it blindly. Explain the issue and propose the correct architectural alternative.
+* **Clarify Intent:** If any requirement is ambiguous or underspecified, stop and request clarification using a `[NEEDS CLARIFICATION: ...]` tag rather than making assumptions.
+
+---
 
 ### Pillar II — Architecture & Code Quality
-- Enforce SOLID, DRY, and Separation of Concerns
-- Eliminate Bloaters (Long Methods, Large Classes); encapsulate third-party
-  APIs behind an Adapter; replace sprawling if/else chains with Strategy/State
+
+* **Keep It Simple:** Apply **KISS** and **YAGNI** at all times. Prefer the simplest solution that fully satisfies the requirements without sacrificing readability or maintainability.
+* **Core Design Principles:** Enforce **SOLID**, **DRY**, and clear **Separation of Concerns (SoC)** throughout the implementation.
+
+* **Refactoring Discipline:**
+  * Eliminate code bloat by keeping methods and classes focused on a single responsibility.
+  * Use **Extract Method** and **Extract Class** whenever they improve clarity.
+  * Minimize coupling and avoid "Feature Envy" by keeping behavior close to the data it operates on.
+  
+* **Design Pattern Guidance:**
+  * Replace large conditional branches with **Strategy** or **State** when polymorphism improves maintainability.
+  * Encapsulate complex object construction behind **Factory Methods** when object creation becomes non-trivial.
+  * Encapsulate third-party APIs behind an **Adapter** to isolate external dependencies.
+
+* **Avoid Hardcoding:** Never hardcode structural values, architectural decisions, or configuration that should be centralized or configurable.
+
+---
 
 ### Pillar III — Execution Discipline & Definition of Done
-- Surgical Precision: touch only the files the active task requires
-- Orphan Cleanup: remove imports/variables/helpers your own change makes obsolete
-- DoD: not "done" until success criteria + lint/compiler checks + zero
-  orphaned code + pattern compliance all pass
+
+* **Surgical Precision:** Modify only the files and lines required to complete the active task. Avoid unrelated refactoring or formatting-only changes unless explicitly requested.
+* **Orphan Cleanup:** Remove any imports, variables, parameters, helper functions, or dead code made obsolete by your changes.
+* **Definition of Done:** A task is complete only when:
+
+  * All explicit requirements are satisfied.
+  * The solution follows this constitution.
+  * Local compiler, linter, and static-analysis checks pass (when applicable).
+  * No obsolete or orphaned code remains.
+  * The implementation is the simplest maintainable solution that satisfies the requirements.
 ```
 
-Worth borrowing whenever the constitution itself needs to double as an audit trail — the Sync Impact Report makes each amendment's *reasoning* and *blast radius* (which templates need a matching update) explicit instead of buried in a commit message.
-
-**Concrete example:**
+**Additional example:**
 
 ```markdown
 # Project Constitution: PhotoVault
@@ -213,6 +237,7 @@ MAJOR = principle removed/redefined · MINOR = principle added · PATCH = wordin
 **What it is:** the **what/why** for one feature. Deliberately tech-agnostic — no stack, no APIs, no code structure. If the prompt doesn't specify something, the template forces an explicit `[NEEDS CLARIFICATION: ...]` marker instead of letting the agent guess.
 
 **Typical structure:**
+
 - Header: feature branch name, created date, status
 - **User Scenarios & Testing** — user stories with priority (P1, P2…), `Given/When/Then` acceptance scenarios, edge cases
 - **Requirements** — numbered functional requirements (`FR-001`, `FR-002`…), each a testable "System MUST…" statement
@@ -252,6 +277,7 @@ organize photos without thinking about folders.
 **What it is:** the **how** — generated *from* the spec plus the constitution. This is where the tech stack, architecture, and constitutional compliance checks live.
 
 **Typical structure:**
+
 - **Technical Context** — language, framework, storage, testing tool
 - **Constitutional Compliance / "Phase -1 Gates"** — explicit checkboxes against each constitution principle (e.g. "Using ≤3 projects? ✅", "Framework used directly? ✅"); failures must be justified in a "Complexity Tracking" section, not silently skipped
 - Companion files it generates: `research.md` (tech investigation), `data-model.md` (entities), `contracts/` (API/event contracts), `quickstart.md` (validation scenarios)
@@ -298,6 +324,7 @@ Language: JavaScript (vanilla) | Stack: Vite | Storage: local SQLite | Testing: 
 A concrete before/after using an actual pre-Spec-Kit planning doc — a "Project Passport" (North Star + Success Criteria + Definition of Done) plus a Scrumban board — for a small ML API project.
 
 **The original doc, in full:**
+
 - **North Star:** "An API that returns the price of an apartment based on input data."
 - **Technologies:** FastAPI, Scikit-learn (or XGBoost), ChromaDB, Pandas
 - **Definition of Done:** `/predict` returns JSON with the price · code is on GitHub · model loads from a `.joblib`/`.pkl` file
@@ -345,6 +372,7 @@ This is the single most-confused distinction in the Spec Kit community (it has i
 | Changes how often | Rarely — it's a constitution, not a changelog | Every feature — it's a status board |
 
 **What should go in the agent context file that should NOT be duplicated from constitution/spec/plan:**
+
 - "Feature in progress" pointer: which `spec.md`/`plan.md` you're currently working from
 - The *currently detected* language/framework/database (auto-extracted from the latest `plan.md`)
 - A short recent-changes log for orientation after a context reset
@@ -352,6 +380,7 @@ This is the single most-confused distinction in the Spec Kit community (it has i
 - Imports/links to other docs (`README.md`, `AGENTS.md`, `codingstandards.md`) if you run multiple agents and want one shared baseline
 
 **What should NOT go there** (it belongs elsewhere and duplicating it causes drift):
+
 - Durable architecture rules → constitution.md
 - Feature requirements / acceptance criteria → spec.md
 - Stack rationale for a specific feature → plan.md (this file gets overwritten anyway)
@@ -411,6 +440,7 @@ flowchart LR
 ```
 
 Notes:
+
 - `/speckit.constitution` is normally run **once** per project; you don't repeat it for every feature.
 - `/speckit.clarify` and `/speckit.checklist` operate on `spec.md` *before* planning — cheapest place to catch gaps.
 - `/speckit.analyze` runs *after* `/speckit.tasks`, *before* `/speckit.implement` — last checkpoint while the plan/tasks are still cheap to adjust. You can re-run it after implementation too, but don't skip the pre-implementation pass.
@@ -454,12 +484,15 @@ Mixing these without saying so is the most common brownfield mistake — the age
 ### Step-by-step
 
 1. **Scaffold in place, without disturbing Git:**
+
    ```bash
    specify init --here --integration copilot
    # or, if you don't want Spec Kit touching git at all:
    specify init --here --no-git
    ```
+
 2. **Generate the constitution from the codebase**, not from a blank template — be explicit about depth and your chosen strategy from Step 0:
+
    ```text
    /speckit.constitution As this is a pre-existing brownfield project, analyze the
    codebase exhaustively (do not skim, use multiple passes) and derive principles
@@ -468,11 +501,14 @@ Mixing these without saying so is the most common brownfield mistake — the age
    are migrating toward — pick one]. Include governance for how these guide
    future decisions.
    ```
+
 3. *(Strongly recommended once the codebase is bigger than a few thousand lines)* Ask the agent to write a **compressed view of the codebase** first, and reference it from every spec afterward — think of it as a "compressed view" the agent can re-read instead of re-scanning the whole repo each time:
+
    ```text
    Analyze this codebase. Document architecture, key modules, data flows,
    integration points, and existing conventions. Save as docs/codebase-research.md.
    ```
+
 4. *(Optional shortcut)* Instead of doing steps 2–3 by hand every time, a dedicated **brownfield bootstrap extension** (e.g. community extensions named "Brownfield Bootstrap" or "BrownKit") automates codebase analysis + constitution generation + module-level guidance for multi-module/monorepo codebases — worth installing if you'll repeat this process across several legacy repos.
 5. `/speckit.specify` — brownfield specs are often just a short, focused natural-language outcome description (the architecture context already lives in the constitution / research doc), not a full PRD. **Scope tightly to one slice of behavior** — naming the exact module/page/endpoint you're touching avoids the agent wandering into unrelated refactors.
 6. `/speckit.clarify` if anything is underspecified — pay particular attention to integration points the spec doesn't mention explicitly (auth, cross-origin calls, existing data migrations); these are the most common source of mid-implementation surprises on brownfield.
@@ -515,13 +551,16 @@ cd apps/web   # commands resolve to the NEAREST .specify/, not the repo root
 ```
 
 **Targeting a project without `cd`** (CI / scripted runs):
+
 ```bash
 export SPECIFY_INIT_DIR=apps/web      # selects the PROJECT
 export SPECIFY_FEATURE_DIRECTORY=specs/003-search   # selects the FEATURE within it
 ```
+
 A bad path errors loudly instead of silently falling back to the repo root — a typo never writes specs into the wrong project.
 
 **Key facts:**
+
 - Each member project's `constitution.md` is fully independent — Spec Kit has **no built-in inheritance**. If you want shared rules across `web`/`api`/`preprocessing`, you maintain that duplication or wiring yourself.
 - A common workaround: keep a top-level `docs/architecture.md` or `specs-shared/` folder at the repo root (outside any `.specify/`) for cross-cutting rules, and have each member project's constitution link to it by relative path. This is a **team convention**, not a built-in feature — don't expect `/speckit.plan` to follow that link automatically; it only reads its own project's constitution unless you also paste the shared content into your prompt.
 - Git branches are still shared at the repo root (one Git repo), even though spec directories live per-project — manage branch namespacing accordingly, or use separate Git repos per member project if you need full isolation.
@@ -576,10 +615,12 @@ specify preset add <name>
 | **Living Spec** | `spec.md` is the contract; edit it first, then regenerate `plan.md`/`tasks.md` from it | Spec is genuinely the stable, authoritative contract | Losing implementation rationale if derived files are regenerated without preserving key decisions |
 
 **How to choose** — answer two questions and write the answer into your constitution or onboarding notes:
+
 1. Should a completed feature directory be a historical record (→ Flow-Forward) or an editable work area (→ Flow-Back)?
 2. Is `spec.md` the single source of truth (→ Living Spec), or are `plan.md`/`tasks.md` allowed to become co-equal sources (→ Flow-Back)?
 
 **Practical workflow per model** (when requirements change mid-project):
+
 - **Flow-Forward:** `/speckit.specify` for a new feature dir → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`. Keep the old directory; cross-link if it's superseded.
   *Example:* you shipped `specs/004-login/` with email/password auth. Six months later you need SSO. You don't touch `004-login/` — you run `/speckit.specify Add SSO login via SAML, replacing email/password as the primary flow` to create `specs/012-login-sso/`, which references `004-login/` in its spec as "supersedes." Anyone auditing the project later can see exactly when and why auth changed.
 - **Living Spec:** edit `spec.md` (via `/speckit.clarify` or directly) → rerun `/speckit.plan` → rerun `/speckit.tasks` → `/speckit.analyze` → `/speckit.implement`. Carry forward any still-relevant rationale before discarding old derived files.
@@ -609,6 +650,7 @@ You can even mix models across a monorepo's member projects, as long as each pro
 Because completed tasks are marked `[X]` in `tasks.md`, re-invoking `/speckit.implement` always **picks up where it left off** — this is what makes option 1 safe to use liberally.
 
 **When to start a new chat session vs. continue in the same one — practical rule of thumb:**
+
 - **New session per phase/command** when: you're switching from planning-type work to execution-type work (e.g., a fresh session for `/speckit.plan`, a fresh one for `/speckit.implement`), or a single phase is large enough that you'd otherwise hit option 1 above repeatedly within one session.
 - **Stay in one session** for: the spec → clarify → checklist loop on a single feature — that context is small and benefits from continuity (the agent remembers *why* it asked what it asked).
 - **Always start fresh for review/critique** (see §12) — a reviewer with no investment in the work it's checking catches more.
@@ -681,6 +723,7 @@ Without it, you manage Git entirely yourself, and Spec Kit just writes files int
 **How Git ties into the workflow, once the extension is on:** each `/speckit.specify` creates a new numbered branch (`001-feature-name`), and `/speckit.plan` / `/speckit.tasks` / `/speckit.implement` auto-detect "the active feature" from **whichever branch you're currently on** — switching specs is just switching branches.
 
 **Where GitHub *specifically* (not just Git) comes in:**
+
 - **Default agent:** in non-interactive runs (CI, piped input), `specify init` defaults to **GitHub Copilot** as the integration unless you pass `--integration <other-agent>`.
 - **`/speckit.taskstoissues`:** the one command that talks to GitHub directly — it pushes each `tasks.md` entry into a GitHub Issue in your repo's existing remote (via the `gh` CLI), preserving task IDs for traceability. It requires `gh` to already be authenticated and a GitHub remote to already exist — it doesn't create the repo for you.
 - **Extension/preset catalogs:** the public catalogs of community extensions and presets are themselves hosted on GitHub; teams that want a private catalog self-host it the same way, authenticated with a `GITHUB_TOKEN`.
@@ -693,20 +736,20 @@ Without it, you manage Git entirely yourself, and Spec Kit just writes files int
 
 | Resource | Link |
 |---|---|
-| Main repository (source, issues, releases) | https://github.com/github/spec-kit |
-| Documentation home | https://github.github.com/spec-kit/ |
-| Quickstart guide | https://github.github.com/spec-kit/quickstart.html |
-| Installation guide | https://github.github.com/spec-kit/installation.html |
-| CLI / core commands reference | https://github.github.com/spec-kit/reference/core.html |
-| Spec-Driven Development methodology (original write-up) | https://github.com/github/spec-kit/blob/main/spec-driven.md |
-| Concepts: what SDD is | https://github.github.com/spec-kit/concepts/sdd.html |
-| Concepts: spec persistence models | https://github.github.com/spec-kit/concepts/spec-persistence.html |
-| Concepts: complex features & context windows | https://github.github.com/spec-kit/concepts/complex-features.html |
-| Guide: evolving specs over time | https://github.github.com/spec-kit/guides/evolving-specs.html |
-| Guide: monorepo setup | https://github.github.com/spec-kit/guides/monorepo.html |
-| Changelog (what changed, in which version) | https://github.com/github/spec-kit/blob/main/CHANGELOG.md |
-| Releases (for pinning a specific version) | https://github.com/github/spec-kit/releases |
-| Worked demo: greenfield & brownfield (.NET CLI) | https://github.com/mnriem/spec-kit-dotnet-cli-demo |
-| Community extensions (incl. AIDE) | https://github.com/mnriem/spec-kit-extensions |
+| Main repository (source, issues, releases) | <https://github.com/github/spec-kit> |
+| Documentation home | <https://github.github.com/spec-kit/> |
+| Quickstart guide | <https://github.github.com/spec-kit/quickstart.html> |
+| Installation guide | <https://github.github.com/spec-kit/installation.html> |
+| CLI / core commands reference | <https://github.github.com/spec-kit/reference/core.html> |
+| Spec-Driven Development methodology (original write-up) | <https://github.com/github/spec-kit/blob/main/spec-driven.md> |
+| Concepts: what SDD is | <https://github.github.com/spec-kit/concepts/sdd.html> |
+| Concepts: spec persistence models | <https://github.github.com/spec-kit/concepts/spec-persistence.html> |
+| Concepts: complex features & context windows | <https://github.github.com/spec-kit/concepts/complex-features.html> |
+| Guide: evolving specs over time | <https://github.github.com/spec-kit/guides/evolving-specs.html> |
+| Guide: monorepo setup | <https://github.github.com/spec-kit/guides/monorepo.html> |
+| Changelog (what changed, in which version) | <https://github.com/github/spec-kit/blob/main/CHANGELOG.md> |
+| Releases (for pinning a specific version) | <https://github.com/github/spec-kit/releases> |
+| Worked demo: greenfield & brownfield (.NET CLI) | <https://github.com/mnriem/spec-kit-dotnet-cli-demo> |
+| Community extensions (incl. AIDE) | <https://github.com/mnriem/spec-kit-extensions> |
 
 Bookmark the documentation home rather than any single page — Spec Kit ships releases frequently, and command/flag names have already changed once (the old `--ai` flag family was replaced by `--integration` in a recent release).
